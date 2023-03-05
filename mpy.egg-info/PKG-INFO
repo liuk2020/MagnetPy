@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: mpy
+Version: 0.0.0
+Summary: Data processing tools for plasma and amgnetic field
+Home-page: https://github.com/liuk2020/MagnetPy.git
+Author: Caoxiang Zhu
+Author-email: lk2020@mail.ustc.edu.cn
+License: GNU 3.0
+Classifier: Development Status :: 3 - Alpha
+Classifier: License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)
+Classifier: Programming Language :: Python :: 3
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# MagnetPy
