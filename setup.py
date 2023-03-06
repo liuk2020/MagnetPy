@@ -1,8 +1,6 @@
 import setuptools
-from numpy.distutils.core import Extension, setup
-from numpy.distutils.fcompiler import get_default_fcompiler
+from numpy.distutils.core import setup
 
-# from coilpy import __version__
 
 __version__ = "0.0.0"
 
