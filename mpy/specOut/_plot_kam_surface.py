@@ -36,9 +36,7 @@ def plot_kam_surface(self, ns=[], ntheta=1000, zeta=0.0, ax=None, **kwargs):
         for i in ns:
             _surf = FourSurf.read_spec_output(self, i)
             if i == 0:
-                # plot axis as a curve
-                _r, _z = _surf.rz(0.0, zeta)
-                plt.scatter(_r, _z, **kwargs)
+                pass  # don't do anything for the axis
             else:
                 _surf.plot(zeta=zeta, **kwargs)
             surfs.append(_surf)
