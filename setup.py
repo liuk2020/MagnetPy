@@ -12,7 +12,7 @@ REQUIREMENTS = [i.strip() for i in open("requirements.txt").readlines()]
 setup(
     name="mpy",
     version=__version__,
-    description="Data processing tools for plasma and amgnetic field",
+    description="Data processing tools for plasma and magnetic field",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
