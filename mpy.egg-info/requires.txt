@@ -1,1 +1,4 @@
 numpy
+matplotlib
+xarray
+py_spec

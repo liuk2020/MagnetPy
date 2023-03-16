@@ -1,4 +1,5 @@
 numpy
 matplotlib
 xarray
+h5py
 py_spec
