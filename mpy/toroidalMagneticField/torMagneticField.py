@@ -10,6 +10,9 @@ from ..specOut import SPECOut
 from typing import Tuple
 
 
+deltaS = 1e-4
+
+
 class TorMagneticField():
 
     def __init__(
@@ -23,7 +26,7 @@ class TorMagneticField():
         Magnetic field in toroidal coordinates!
         """
         self.sResolution, self.thetaResolution, self.zetaResolution = rGrid.shape
-        self.sArr = np.linspace(-1, 1, self.sResolution)
+        self.sArr = np.linspace(-1+deltaS, 1-deltaS, self.sResolution)
         self.thetaArr = np.linspace(0, 2*np.pi, self.thetaResolution)
         self.zetaArr = np.linspace(0, 2*np.pi/nfp, self.zetaResolution)
         self.rGrid = rGrid
@@ -44,7 +47,7 @@ class TorMagneticField():
     @classmethod
     def readSPECout(cls, specData: SPECOut, lvol: int=0, sResolution: int=2, thetaResolution: int=2, zetaResolution: int=2):
         nfp = specData.input.physics.Nfp
-        sArr = np.linspace(-1, 1, sResolution)
+        sArr = np.linspace(-1+deltaS, 1-deltaS, sResolution)
         thetaArr = np.linspace(0, 2*np.pi, thetaResolution)
         zetaArr = np.linspace(0, 2*np.pi/nfp, zetaResolution)
         rGrid, r_s, r_theta, r_zeta, zGrid, z_s, z_theta, z_zeta = specData.get_RZ_derivatives(
@@ -97,7 +100,7 @@ class TorMagneticField():
         r"""
         return: r, z, B^\s, B^\theta, B^\zeta, jacobian, metric
         """
-        if isinstance(sValue, float):
+        if isinstance(sValue, float) or isinstance(sValue, int):
             assert -1 <= sValue <= 1
         else:
             assert -1 <= sValue.all() <= 1

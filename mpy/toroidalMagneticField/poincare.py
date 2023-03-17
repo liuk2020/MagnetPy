@@ -24,7 +24,7 @@ class Poincare:
         if kwargs.get("marker") == None:
             kwargs.update({"marker": "."})
         if kwargs.get("s") == None:
-            kwargs.update({"s": 0.5})
+            kwargs.update({"s": 1.0})
         dots = ax.scatter(self.rArr, self.zArr, **kwargs)
         plt.xlabel("R/m", fontsize=fontsize)
         plt.ylabel("Z/m", fontsize=fontsize)
