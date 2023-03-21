@@ -18,6 +18,8 @@ class SPECOut(py_spec.SPECout):
 
     from ._plot_pressure import plot_pressure
 
+    from ._plot_poincare import plot_poincare
+
 
 if __name__ == "__main__":
     pass
