@@ -14,7 +14,7 @@ class SPECOut(py_spec.SPECout):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    from ._plot_kam_surface import plot_kam_surface
+    # from ._plot_kam_surface import plot_kam_surface
 
     from ._plot_pressure import plot_pressure
 
