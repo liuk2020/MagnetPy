@@ -36,21 +36,18 @@ def traceLine(
         kwargs.update({"method": "LSODA"}) 
     if kwargs.get("rtol") is None:
         kwargs.update({"rtol": 1e-6}) 
-    if bMethod == "interpolate":
-        base_bSupS, base_bSupTheta, base_bSupZeta = bField.getB()
+    
+    base_bSupS, base_bSupTheta, base_bSupZeta = bField.getB()
+    base_Jacobian = bField.getJacobian()
+    
+    from pyoculus.problems import SPECBfield
+    pyoculusField = SPECBfield(bField.specData, bField.lvol+1)
 
     def getB_calculate(zeta, s_theta):
-        field = bField.specData.get_B(
-            lvol = bField.lvol, 
-            sarr = np.array(s_theta[0]),
-            tarr = np.array(s_theta[1]),
-            zarr = np.array(zeta)
-        )
-        print(field)
-        bSupS = field[0,0,0,0]
-        bSupTheta = field[0,0,0,1]
-        bSupZeta = field[0,0,0,2]
-        print([bSupS/bSupZeta, bSupTheta/bSupZeta])
+        field = pyoculusField.B_many(s_theta[0], s_theta[1], zeta) / bField.interpValue(base_Jacobian, s_theta[0], s_theta[1], zeta)
+        bSupS = field[0, 0]
+        bSupTheta = field[0, 1]
+        bSupZeta = field[0, 2]
         return [bSupS/bSupZeta, bSupTheta/bSupZeta]
     
     def getB_interpolate(zeta, s_theta):
