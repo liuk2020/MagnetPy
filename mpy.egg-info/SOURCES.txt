@@ -7,6 +7,11 @@ mpy.egg-info/SOURCES.txt
 mpy.egg-info/dependency_links.txt
 mpy.egg-info/requires.txt
 mpy.egg-info/top_level.txt
+mpy/_SPECMagneticField/__init__.py
+mpy/_SPECMagneticField/fieldLine.py
+mpy/_SPECMagneticField/poincare.py
+mpy/_SPECMagneticField/torMagneticField.py
+mpy/_SPECMagneticField/tracing.py
 mpy/misc/__init__.py
 mpy/misc/print.py
 mpy/qshpost/__init__.py
@@ -22,11 +27,6 @@ mpy/specOut/_plot_kam_surface.py
 mpy/specOut/_plot_poincare.py
 mpy/specOut/_plot_pressure.py
 mpy/specOut/specOut.py
-mpy/toroidalMagneticField/__init__.py
-mpy/toroidalMagneticField/fieldLine.py
-mpy/toroidalMagneticField/poincare.py
-mpy/toroidalMagneticField/torMagneticField.py
-mpy/toroidalMagneticField/tracing.py
 mpy/vmec2spec/__init__.py
 mpy/vmec2spec/misc.py
 mpy/vmec2spec/vmec2spec.py

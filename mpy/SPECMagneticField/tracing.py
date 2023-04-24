@@ -3,66 +3,95 @@
 # tracing.py
 
 
-import numpy as np
-from scipy.integrate import solve_ivp
-from .torMagneticField import TorMagneticField
-from .fieldLine import FieldLine
-from typing import List
+import numpy as np 
+from scipy.integrate import solve_ivp 
+from ._SPECField import SPECField
+from ._FieldLine import FieldLine 
 from ..misc import print_progress
+from typing import List
 
 
-def traceLine(bField: TorMagneticField, s0: np.ndarray, theta0: np.ndarray, zeta0: np.ndarray, 
-niter: int = 100, radius: float=5.0, **kwargs) -> List[FieldLine]:
+def traceLine(
+    bField: SPECField, 
+    s0: np.ndarray, theta0: np.ndarray, zeta0: np.ndarray, 
+    niter: int=128, nstep: int=32,
+    bMethod: str="calculate", **kwargs
+) -> List[FieldLine]:
     r"""
     Working in SPEC coordintes (s, \theta, \zeta), compute magnetic field lines by solving
-        $$ \frac{ds}{dl} = \frac{B^s}{B} $$     
-        $$ \frac{d\theta}{dl} = \frac{B^\theta}{B} $$ 
-        $$ \frac{d\zeta}{dl} = \frac{B^\zeta}{B} $$ 
+        $$ \frac{ds}{d\zeta} = \frac{B^s}{B^\zeta} $$
+        $$ \frac{d\theta}{d\zeta} = \frac{B^\theta}{B^\zeta} $$
     Args:
         bField: the toroidal magnetic field. 
         s0: list of s components of initial points. 
         theta0: list of theta components of initial points. 
-        zeta0: list of zeta components of initial points.
-        niter, radius: the length of the field line is 2*pi*radius*niter 
+        zeta0: list of zeta components of initial points. 
+        niter: Number of toroidal periods. 
+        nstep: Number of intermediate step for one period
+        bMethod: should be `"calculate"` or "`interpolate`" , the method to get the magnetic field. 
     """
-
+    
     assert s0.shape == theta0.shape == zeta0.shape
-
-    def getB(dLength, point):
-        s = point[0]
-        thtea = point[1]
-        zeta = point[2]
-        r, z, bSupS, bSupTheta, bSupZeta, jacobian, metric = bField.interpValue(sValue=s, thetaValue=thtea, zetaValue=zeta)
-        bArr = [bSupS, bSupTheta, bSupZeta]
-        bPow = 0
-        for i in range(3):
-            for j in range(3):
-                bPow += (bArr[i]*bArr[j]*metric[0,i,j])
-        b = np.power((bPow), 0.5)
-        return [bSupS/b, bSupTheta/b, bSupZeta/b]
-
     if kwargs.get("method") is None:
         kwargs.update({"method": "LSODA"}) 
     if kwargs.get("rtol") is None:
         kwargs.update({"rtol": 1e-6}) 
-    print("Begin field-line tracing: ")
+    if bMethod == "interpolate":
+        base_bSupS, base_bSupTheta, base_bSupZeta = bField.getB()
+
+    def getB_calculate(zeta, s_theta):
+        field = bField.specData.get_B(
+            lvol = bField.lvol, 
+            sarr = np.array(s_theta[0]),
+            tarr = np.array(s_theta[1]),
+            zarr = np.array(zeta)
+        )
+        print(field)
+        bSupS = field[0,0,0,0]
+        bSupTheta = field[0,0,0,1]
+        bSupZeta = field[0,0,0,2]
+        print([bSupS/bSupZeta, bSupTheta/bSupZeta])
+        return [bSupS/bSupZeta, bSupTheta/bSupZeta]
+    
+    def getB_interpolate(zeta, s_theta):
+        bSupS = bField.interpValue(baseData=base_bSupS, sValue=s_theta[0], thetaValue=s_theta[1], zetaValue=zeta)
+        bSupTheta = bField.interpValue(baseData=base_bSupTheta, sValue=s_theta[0], thetaValue=s_theta[1], zetaValue=zeta)
+        bSupZeta = bField.interpValue(baseData=base_bSupZeta, sValue=s_theta[0], thetaValue=s_theta[1], zetaValue=zeta)
+        return [bSupS/bSupZeta, bSupTheta/bSupZeta]
+    
     lines = list()
     nLine = len(s0)
-    for i in range(nLine):
-        # lengthArr = np.array([])
-        sArr = np.array([])
-        thetaArr = np.array([])
-        zetaArr = np.array([])
-        point = [s0[i], theta0[i], zeta0[i]]
-        for j in range(niter):
+    print("Begin field-line tracing: ")
+    for i in range(nLine):              # loop over each field-line 
+        s_theta = [s0[i], theta0[i]]
+        zetaStart = zeta0[i]
+        dZeta = 2 * np.pi / bField.nfp / nstep
+        sArr = list()
+        thetaArr = list()
+        zetaArr = list()
+        for j in range(niter):          # loop over each toroidal iteration
             print_progress(i*niter+j+1, nLine*niter)
-            sol = solve_ivp(getB, (j*2*np.pi*radius, (j+1)*2*np.pi*radius), point, **kwargs)
-            # lengthArr = np.concatenate((lengthArr, sol.t), axis=0)
-            sArr = np.concatenate((sArr, sol.y[0, :]), axis=0)
-            thetaArr = np.concatenate((thetaArr, sol.y[1, :]), axis=0)
-            zetaArr = np.concatenate((zetaArr, sol.y[2, :]), axis=0)
-            point = [sArr[-1], thetaArr[-1], zetaArr[-1]]
-        lines.append(FieldLine(bField, sArr, thetaArr, zetaArr))
+            for k in range(nstep):      # loop inside one iteration
+                if bMethod == "calculate":
+                    sol = solve_ivp(
+                        getB_calculate, 
+                        (zetaStart, zetaStart+dZeta), 
+                        s_theta, **kwargs
+                    )
+                elif bMethod == "interpolate":
+                    sol = solve_ivp(
+                        getB_interpolate, 
+                        (zetaStart, zetaStart+dZeta), 
+                        s_theta, **kwargs
+                    )
+                else:
+                    raise ValueError("bMethod should be calculate or interpolate. ")
+                sArr.append(sol.y[0,-1])
+                thetaArr.append(sol.y[1,-1])
+                zetaArr.append(zetaStart+dZeta)
+                s_theta = [sArr[-1], thetaArr[-1]]
+                zetaStart = zetaArr[-1]
+        lines.append(FieldLine.getLine_tracing(bField, nstep, np.array(sArr), np.array(thetaArr), np.array(zetaArr)))
     return lines
 
 
