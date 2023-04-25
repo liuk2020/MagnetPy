@@ -7,6 +7,7 @@ import numpy as np
 from scipy.integrate import solve_ivp 
 from ._SPECField import SPECField
 from ._FieldLine import FieldLine 
+from .readData import readB, readJacobian
 from ..misc import print_progress
 from typing import List
 
@@ -15,7 +16,8 @@ def traceLine(
     bField: SPECField, 
     s0: np.ndarray, theta0: np.ndarray, zeta0: np.ndarray, 
     niter: int=128, nstep: int=32,
-    bMethod: str="calculate", **kwargs
+    bMethod: str="calculate", 
+    bData: str=None, jacobianData: str=None, **kwargs
 ) -> List[FieldLine]:
     r"""
     Working in SPEC coordintes (s, \theta, \zeta), compute magnetic field lines by solving
@@ -37,23 +39,40 @@ def traceLine(
     if kwargs.get("rtol") is None:
         kwargs.update({"rtol": 1e-6}) 
     
-    base_bSupS, base_bSupTheta, base_bSupZeta = bField.getB()
-    base_Jacobian = bField.getJacobian()
-    
-    from pyoculus.problems import SPECBfield
-    pyoculusField = SPECBfield(bField.specData, bField.lvol+1)
+    if bMethod == "calculate":
+        from pyoculus.problems import SPECBfield
+        pyoculusField = SPECBfield(bField.specData, bField.lvol+1)
+        if jacobianData is None:
+            base_Jacobian = bField.getB()
+            base_sArr = bField.sArr
+            base_thetaArr = bField.thetaArr
+            base_zetaArr = bField.zetaArr
+        else:
+            base_sArr, base_thetaArr, base_zetaArr, base_Jacobian = readJacobian(jacobianData)
+    elif bMethod == "interpolate":
+        if bData is None:
+            base_bSupS, base_bSupTheta, base_bSupZeta = bField.getB()
+            base_sArr = bField.sArr
+            base_thetaArr = bField.thetaArr
+            base_zetaArr = bField.zetaArr
+        else:
+            base_sArr, base_thetaArr, base_zetaArr, base_bSupS, base_bSupTheta, base_bSupZeta = readB(bData)
+    else:
+        raise ValueError(
+            "`bMethod` should be `calculate` or `interpolate`. "
+        )
 
     def getB_calculate(zeta, s_theta):
-        field = pyoculusField.B_many(s_theta[0], s_theta[1], zeta) / bField.interpValue(base_Jacobian, s_theta[0], s_theta[1], zeta)
+        field = pyoculusField.B_many(s_theta[0], s_theta[1], zeta) / bField.interpValue(base_Jacobian, s_theta[0], s_theta[1], zeta, sArr=base_sArr, thetaArr=base_thetaArr, zetaArr=base_zetaArr)
         bSupS = field[0, 0]
         bSupTheta = field[0, 1]
         bSupZeta = field[0, 2]
         return [bSupS/bSupZeta, bSupTheta/bSupZeta]
     
     def getB_interpolate(zeta, s_theta):
-        bSupS = bField.interpValue(baseData=base_bSupS, sValue=s_theta[0], thetaValue=s_theta[1], zetaValue=zeta)
-        bSupTheta = bField.interpValue(baseData=base_bSupTheta, sValue=s_theta[0], thetaValue=s_theta[1], zetaValue=zeta)
-        bSupZeta = bField.interpValue(baseData=base_bSupZeta, sValue=s_theta[0], thetaValue=s_theta[1], zetaValue=zeta)
+        bSupS = bField.interpValue(baseData=base_bSupS, sValue=s_theta[0], thetaValue=s_theta[1], zetaValue=zeta, sArr=base_sArr, thetaArr=base_thetaArr, zetaArr=base_zetaArr)
+        bSupTheta = bField.interpValue(baseData=base_bSupTheta, sValue=s_theta[0], thetaValue=s_theta[1], zetaValue=zeta, sArr=base_sArr, thetaArr=base_thetaArr, zetaArr=base_zetaArr)
+        bSupZeta = bField.interpValue(baseData=base_bSupZeta, sValue=s_theta[0], thetaValue=s_theta[1], zetaValue=zeta, sArr=base_sArr, thetaArr=base_thetaArr, zetaArr=base_zetaArr)
         return [bSupS/bSupZeta, bSupTheta/bSupZeta]
     
     lines = list()
@@ -63,9 +82,9 @@ def traceLine(
         s_theta = [s0[i], theta0[i]]
         zetaStart = zeta0[i]
         dZeta = 2 * np.pi / bField.nfp / nstep
-        sArr = list()
-        thetaArr = list()
-        zetaArr = list()
+        sArr = [s0[i]]
+        thetaArr = [theta0[i]]
+        zetaArr = [zeta0[i]]
         for j in range(niter):          # loop over each toroidal iteration
             print_progress(i*niter+j+1, nLine*niter)
             for k in range(nstep):      # loop inside one iteration
