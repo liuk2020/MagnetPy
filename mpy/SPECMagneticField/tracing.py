@@ -17,7 +17,8 @@ def traceLine(
     s0: np.ndarray, theta0: np.ndarray, zeta0: np.ndarray, 
     niter: int=128, nstep: int=32,
     bMethod: str="calculate", 
-    bData: str=None, jacobianData: str=None, **kwargs
+    bData: str=None, jacobianData: str=None, 
+    printControl: bool=True, **kwargs
 ) -> List[FieldLine]:
     r"""
     Working in SPEC coordintes (s, \theta, \zeta), compute magnetic field lines by solving
@@ -37,7 +38,7 @@ def traceLine(
     if kwargs.get("method") is None:
         kwargs.update({"method": "LSODA"}) 
     if kwargs.get("rtol") is None:
-        kwargs.update({"rtol": 1e-6}) 
+        kwargs.update({"rtol": 1e-10}) 
     
     if bMethod == "calculate":
         from pyoculus.problems import SPECBfield
@@ -77,7 +78,8 @@ def traceLine(
     
     lines = list()
     nLine = len(s0)
-    print("Begin field-line tracing: ")
+    if printControl:
+        print("Begin field-line tracing: ")
     for i in range(nLine):              # loop over each field-line 
         s_theta = [s0[i], theta0[i]]
         zetaStart = zeta0[i]
@@ -86,7 +88,8 @@ def traceLine(
         thetaArr = [theta0[i]]
         zetaArr = [zeta0[i]]
         for j in range(niter):          # loop over each toroidal iteration
-            print_progress(i*niter+j+1, nLine*niter)
+            if printControl:
+                print_progress(i*niter+j+1, nLine*niter)
             for k in range(nstep):      # loop inside one iteration
                 if bMethod == "calculate":
                     sol = solve_ivp(
