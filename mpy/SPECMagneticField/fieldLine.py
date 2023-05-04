@@ -5,7 +5,7 @@
 
 import h5py
 import numpy as np
-from ._SPECField import SPECField
+from .specField import SPECField
 from typing import List
 
 

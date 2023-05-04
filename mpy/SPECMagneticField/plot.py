@@ -4,7 +4,7 @@
 
 
 import matplotlib.pyplot as plt
-from ._FieldLine import FieldLine
+from .fieldLine import FieldLine
 from typing import List
 
 

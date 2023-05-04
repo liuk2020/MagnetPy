@@ -5,8 +5,8 @@
 
 import numpy as np 
 from scipy.integrate import solve_ivp 
-from ._SPECField import SPECField
-from ._FieldLine import FieldLine 
+from .specField import SPECField
+from .fieldLine import FieldLine 
 from .readData import readB, readJacobian
 from ..misc import print_progress
 from typing import List
@@ -33,7 +33,10 @@ def traceLine(
         nstep: Number of intermediate step for one period
         bMethod: should be `"calculate"` or "`interpolate`" , the method to get the magnetic field. 
     """
-    
+    if isinstance(s0, float):
+        s0, theta0, zeta0 = np.array([s0]), np.array([theta0]), np.array([zeta0])
+    elif isinstance(s0, list):
+        s0, theta0, zeta0 = np.array(s0), np.array(theta0), np.array(zeta0)
     assert s0.shape == theta0.shape == zeta0.shape
     if kwargs.get("method") is None:
         kwargs.update({"method": "LSODA"}) 

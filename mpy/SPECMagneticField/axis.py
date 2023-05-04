@@ -5,8 +5,8 @@
 
 import numpy as np
 from scipy.integrate import solve_ivp 
-from ._SPECField import SPECField
-from ._FieldLine import FieldLine
+from .specField import SPECField
+from .fieldLine import FieldLine
 from .readData import readB, readJacobian
 from typing import Tuple
 
