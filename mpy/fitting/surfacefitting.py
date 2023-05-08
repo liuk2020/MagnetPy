@@ -9,12 +9,18 @@ from scipy.optimize import OptimizeResult
 from typing import Tuple
 
 
-def fitSurface(thetaArr: np.ndarray, zetaArr: np.ndarray, sArr: np.ndarray, mpol: int, ntol: int, nfp: int=1, debug: bool=False, **kwargs) -> Tuple[np.ndarray] or OptimizeResult:
+def fitSurface(thetaArr: np.ndarray, zetaArr: np.ndarray, sArr: np.ndarray, mpol: int, ntol: int, nfp: int=1, stellsym: str=None, debug: bool=False, **kwargs) -> Tuple[np.ndarray] or OptimizeResult:
     """
     Use the least squares method to fit the toroidal surface!  
     if `debug` is false, return xm, xn, coeffSin, coeffCos 
         s = \sum(coeffSin*sin(xm*theta-nfp*xn*zeta) + coeffCos*cos(xm*theta-nfp*xn*zeta))
-    else if `debug` is true, return class `scipy.optimize.OptimizeResult` 
+    else if `debug` is true, return class `scipy.optimize.OptimizeResult`. 
+    Args:
+        thetaArr: the array of the poloidal angle. 
+        zetaArr: the array of the toroidal angle. 
+        sArr: the scalar quantity on the toroidal surface. 
+        mpol, ntor: the number of poloidal and toroidal Fourier harmonics. 
+        nfp: the number of field periods. 
     """
     
     assert thetaArr.shape == zetaArr.shape == sArr.shape
@@ -23,7 +29,10 @@ def fitSurface(thetaArr: np.ndarray, zetaArr: np.ndarray, sArr: np.ndarray, mpol
     sArr = sArr.flatten()
     mnLen = mpol*(2*ntol+1)+ntol+1
     angleLen = thetaArr.size
-    assert 2*mnLen < thetaArr.size
+    if not stellsym:
+        assert 2*mnLen < thetaArr.size
+    else:
+        assert mnLen < thetaArr.size
     # `verbose = 1`: display a termination report.(0: work silently; 2: display progress during iterations (not supported by 'lm' method))
     if kwargs.get("verbose") is None:
         kwargs.update({"verbose": 1}) 
@@ -43,17 +52,57 @@ def fitSurface(thetaArr: np.ndarray, zetaArr: np.ndarray, sArr: np.ndarray, mpol
             np.dot(coeffCos.reshape(1,-1), np.cos(angleMat))
         ).flatten()
 
+    def getS_sin(coeffArr: np.ndarray, angleArr: np.ndarray) -> np.ndarray:
+        thetaArr = angleArr[0: angleLen]
+        zetaArr = angleArr[angleLen: 2*angleLen]
+        angleMat = (
+            np.dot(xm.reshape(-1,1), thetaArr.reshape(1,-1)) - 
+            nfp * np.dot(xn.reshape(-1,1), zetaArr.reshape(1,-1))
+        )
+        return (np.dot(coeffArr.reshape(1,-1), np.sin(angleMat))).flatten()
+
+    def getS_cos(coeffArr: np.ndarray, angleArr: np.ndarray) -> np.ndarray:
+        thetaArr = angleArr[0: angleLen]
+        zetaArr = angleArr[angleLen: 2*angleLen]
+        angleMat = (
+            np.dot(xm.reshape(-1,1), thetaArr.reshape(1,-1)) - 
+            nfp * np.dot(xn.reshape(-1,1), zetaArr.reshape(1,-1))
+        )
+        return (np.dot(coeffArr.reshape(1,-1), np.cos(angleMat))).flatten()
+
 
     def getErr(coeffArr: np.ndarray, angleArr: np.ndarray, s: np.ndarray) -> np.ndarray:
-        return s - getS(coeffArr, angleArr)
-    
-    optimizeRes = least_squares(getErr, np.zeros(2*mnLen), args=(np.append(thetaArr,zetaArr), sArr), bounds=(-np.inf, np.inf), **kwargs)
+        if not stellsym:
+            return s - getS(coeffArr, angleArr)
+        elif stellsym == "sin":
+            return s - getS_sin(coeffArr, angleArr)
+        elif stellsym == "cos":
+            return s - getS_cos(coeffArr, angleArr)
 
-    if debug:
-        return optimizeRes
+    if not stellsym:
+        optimizeRes = least_squares(getErr, np.zeros(2*mnLen), args=(np.append(thetaArr,zetaArr), sArr), bounds=(-np.inf, np.inf), **kwargs)
+        if debug:
+            return optimizeRes
+        else:
+            assert optimizeRes.success
+            return xm, xn, optimizeRes.x[0:mnLen], optimizeRes.x[mnLen:2*mnLen]
+    elif stellsym == "sin":
+        optimizeRes = least_squares(getErr, np.zeros(mnLen), args=(np.append(thetaArr,zetaArr), sArr), bounds=(-np.inf, np.inf), **kwargs)
+        if debug:
+            return optimizeRes
+        else:
+            assert optimizeRes.success
+            return xm, xn, optimizeRes.x[:], np.zeros(mnLen)
+    elif stellsym == "cos":
+        optimizeRes = least_squares(getErr, np.zeros(mnLen), args=(np.append(thetaArr,zetaArr), sArr), bounds=(-np.inf, np.inf), **kwargs)
+        if debug:
+            return optimizeRes
+        else:
+            assert optimizeRes.success
+            return xm, xn, np.zeros(mnLen), optimizeRes.x[:]
     else:
-        assert optimizeRes.success
-        return xm, xn, optimizeRes.x[0:mnLen], optimizeRes.x[mnLen:2*mnLen]
+        raise ValueError("wrong stellsym")
+
 
 
 def getMN(mpol: int, ntor: int) -> Tuple[np.ndarray, np.ndarray]: 
