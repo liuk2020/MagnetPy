@@ -4,14 +4,37 @@
 
 
 import numpy as np
+from scipy import fft
 from scipy.optimize import least_squares
 from scipy.optimize import OptimizeResult
-from typing import Tuple
+from typing import List, Tuple
 
 
-def fitCurve(thetaArr: np.ndarray, sArr: np.ndarray, mpol: int, debug: bool=False, **kwargs) -> Tuple[np.ndarray] or OptimizeResult:
+def fitClosedCurve(rArr: np.ndarray, zArr: np.ndarray, **kwargs) -> Tuple:
     """
-    Use the least squares method to fit the closed curve! 
+    Use fft to fit the closed curve! 
+    Args:
+        rArr: the r component of the points. 
+        zArr: the z component of the points. 
+    returns:
+        xm, realCom, imagCom
+    $$
+        r = \sum realCom*cos(xm*theta) - imagCom*sin(xm*theta) 
+        z = \sum realCom*sin(xm*theta) - imagCom*cos(xm*theta) 
+    $$
+    """
+
+    assert rArr.shape == zArr.shape
+    nums = len(rArr)
+    points = rArr + zArr * 1j
+    F = fft.fft(points / nums)
+    f_freq = fft.fftfreq(nums, 1/nums) 
+    return f_freq, F.real, F.imag
+
+
+def fitPeriodicCurve(thetaArr: np.ndarray, sArr: np.ndarray, mpol: int, debug: bool=False, **kwargs) -> Tuple[np.ndarray] or OptimizeResult:
+    """
+    Use the least squares method to fit the periodic curve! 
     if `debug` is false, return xm, coeffSin, coeffCos 
         s = \sum(coeffSin*sin(xm*theta) + coeffCos*cos(xm*theta))
     else if `debug` is true, return class `scipy.optimize.OptimizeResult` 

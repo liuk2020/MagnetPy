@@ -1,2 +1,2 @@
-from .curvefitting import fitCurve
+from .curvefitting import fitPeriodicCurve, fitClosedCurve
 from .surfacefitting import fitSurface
