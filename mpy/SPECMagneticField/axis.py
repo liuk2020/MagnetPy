@@ -15,7 +15,7 @@ from typing import Tuple
 
 def findAxis(
     bField: SPECField, sInit: float, thetaInit: float,  
-    nstep: int=32, jacobianData: str=None, debug: bool=False
+    nstep: int=32, jacobianData: str=None, debug: bool=False, printIndex: bool=False
 ) -> FieldLine or OptimizeResult:
     """
     Find magnetic axis by tracing field line!
@@ -65,7 +65,10 @@ def findAxis(
         line= traceLine(initPoint)
         deltaR = line.rArr[-1] - line.rArr[0]
         deltaZ = line.zArr[-1] - line.zArr[0] 
-        return deltaR*deltaR + deltaZ*deltaZ
+        if printIndex:
+            print("(s,theta,zeta) = (" + "{:.1e}".format(line.sArr[0]) + ", " + "{:.1e}".format(line.thetaArr[0]) + ", " + "{:.1e}".format(line.zetaArr[0]) +"), "
+            + " (deltaR, deltaZ) = (" + "{:.1e}".format(deltaR) + ", " + "{:.1e}".format(deltaZ) + ")")
+            return deltaR*deltaR + deltaZ*deltaZ
 
     res = minimize(getDistance, np.array([sInit, thetaInit]))
     if debug:
@@ -81,10 +84,11 @@ def findAxis(
 ### Old Codes! 
 ####################################################################################################################
 def find_Axis(
-    bField: SPECField, sInit: float, thetaInit: float, zetaInit: float, 
+    bField: SPECField, sInit: float, thetaInit: float, zetaInit: float=0, 
     nstep: int=32, jacobianData: str=None, maxInter: int=50, err: float=1e-5, alpha: float=0.08, **kwargs
 ) -> FieldLine:
     """
+    Old function! 
     Find magnetic axis by tracing field line!
     """
     if jacobianData is None:
