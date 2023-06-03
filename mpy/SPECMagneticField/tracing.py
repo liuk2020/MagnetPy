@@ -67,10 +67,14 @@ def traceLine(
         )
 
     def getB_calculate(zeta, s_theta):
-        field = pyoculusField.B_many(s_theta[0], s_theta[1], zeta) / bField.interpValue(base_Jacobian, s_theta[0], s_theta[1], zeta, sArr=base_sArr, thetaArr=base_thetaArr, zetaArr=base_zetaArr)
-        bSupS = field[0, 0]
-        bSupTheta = field[0, 1]
-        bSupZeta = field[0, 2]
+        # field = pyoculusField.B_many(s_theta[0], s_theta[1], zeta) / bField.interpValue(base_Jacobian, s_theta[0], s_theta[1], zeta, sArr=base_sArr, thetaArr=base_thetaArr, zetaArr=base_zetaArr)
+        # bSupS = field[0, 0]
+        # bSupTheta = field[0, 1]
+        # bSupZeta = field[0, 2]
+        field = pyoculusField.B([s_theta[0], s_theta[1], zeta]) / bField.interpValue(base_Jacobian, s_theta[0], s_theta[1], zeta, sArr=base_sArr, thetaArr=base_thetaArr, zetaArr=base_zetaArr)
+        bSupS = field[0]
+        bSupTheta = field[1]
+        bSupZeta = field[2]
         return [bSupS/bSupZeta, bSupTheta/bSupZeta]
     
     def getB_interpolate(zeta, s_theta):
