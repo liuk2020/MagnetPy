@@ -15,7 +15,7 @@ from typing import Tuple
 
 def findAxis(
     bField: SPECField, sInit: float, thetaInit: float,  
-    nstep: int=32, jacobianData: str=None, debug: bool=False, printIndex: bool=False
+    nstep: int=32, jacobianData: str=None, debug: bool=False, printIndex: bool=False, **kwargs
 ) -> FieldLine or OptimizeResult:
     """
     Find magnetic axis by tracing field line!
@@ -70,7 +70,7 @@ def findAxis(
             + " (deltaR, deltaZ) = (" + "{:.1e}".format(deltaR) + ", " + "{:.1e}".format(deltaZ) + ")")
             return deltaR*deltaR + deltaZ*deltaZ
 
-    res = minimize(getDistance, np.array([sInit, thetaInit]))
+    res = minimize(getDistance, np.array([sInit, thetaInit]), **kwargs)
     if debug:
         return res
     else: 
