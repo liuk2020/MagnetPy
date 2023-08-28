@@ -25,7 +25,7 @@ class FieldLine:
         self.equalZeta = equalZeta
 
     @classmethod
-    def getLine_tracing(cls, bField: SPECField, nZeta: int, sArr: np.ndarray, thetaArr: np.ndarray, zetaArr: np.ndarray):
+    def getLine_tracing(cls, bField: SPECField, nZeta: int, sArr: np.ndarray, thetaArr: np.ndarray, zetaArr: np.ndarray, **kwargs):
         rGrid, r_s, r_theta, r_zeta, zGrid, z_s, z_theta, z_zeta = bField.getGrid()
         rArr = bField.interpValue(baseData=rGrid, sValue=sArr, thetaValue=thetaArr, zetaValue=zetaArr)
         zArr = bField.interpValue(baseData=zGrid, sValue=sArr, thetaValue=thetaArr, zetaValue=zetaArr)
@@ -36,7 +36,8 @@ class FieldLine:
             thetaArr = thetaArr,
             zetaArr = zetaArr,
             rArr = rArr,
-            zArr = zArr
+            zArr = zArr,
+            **kwargs
         )
 
     @classmethod
