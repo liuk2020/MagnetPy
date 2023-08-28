@@ -19,6 +19,7 @@ def plotPoincare(lines: List[FieldLine], toroidalIdx: int=0, ax=None, **kwargs):
         kwargs.update({"s": 1.4})
 
     for line in lines:
+        assert line.equalZeta
         rArr = list()
         zArr = list()
         for i in range(len(line.rArr)):

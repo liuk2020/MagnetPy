@@ -14,7 +14,7 @@ class FieldLine:
     Field line in SPEC coordinates and cylindrical coordinates! 
     """
 
-    def __init__(self, nfp: int, nZeta: int, sArr: np.ndarray, thetaArr: np.ndarray, zetaArr: np.ndarray, rArr: np.ndarray, zArr: np.ndarray) -> None:
+    def __init__(self, nfp: int, nZeta: int, sArr: np.ndarray, thetaArr: np.ndarray, zetaArr: np.ndarray, rArr: np.ndarray, zArr: np.ndarray, equalZeta: bool=True) -> None:
         self.nfp = nfp
         self.nZeta = nZeta
         self.sArr = sArr
@@ -22,6 +22,7 @@ class FieldLine:
         self.zetaArr = zetaArr
         self.rArr = rArr
         self.zArr = zArr
+        self.equalZeta = equalZeta
 
     @classmethod
     def getLine_tracing(cls, bField: SPECField, nZeta: int, sArr: np.ndarray, thetaArr: np.ndarray, zetaArr: np.ndarray):
