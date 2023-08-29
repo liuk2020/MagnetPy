@@ -121,7 +121,7 @@ def traceLine(
                 s_theta = [sArr[-1], thetaArr[-1]]
                 zetaStart = zetaArr[-1]
         lines.append(FieldLine.getLine_tracing(bField, nstep, np.array(sArr), np.array(thetaArr), np.array(zetaArr)))
-        if not writeControl:
+        if writeControl:
             lines[-1].writeH5(writeControl+str(i)+".h5")
     
     return lines
@@ -204,7 +204,7 @@ def traceLine_byLength(
                 point = [sArr[-1], thetaArr[-1], zetaArr[-1]]
                 initLength += deltaLength
         lines.append(FieldLine.getLine_tracing(bField, nstep, np.array(sArr), np.array(thetaArr), np.array(zetaArr), equalZeta=False))
-        if not writeControl:
+        if writeControl:
             lines[-1].writeH5(writeControl+str(lineIndex)+".h5")
     
     return lines
