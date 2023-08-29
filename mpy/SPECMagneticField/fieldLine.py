@@ -41,7 +41,7 @@ class FieldLine:
         )
 
     @classmethod
-    def readH5(cls, h5File: str):
+    def readH5(cls, h5File: str, **kwargs):
         with h5py.File(h5File, 'r') as f:
             nfp = int(f["grid"][0])
             nZeta = int(f["grid"][1])
@@ -57,7 +57,8 @@ class FieldLine:
             thetaArr = thetaArr,
             zetaArr = zetaArr,
             rArr = rArr,
-            zArr = zArr
+            zArr = zArr, 
+            **kwargs
         )
 
     def writeH5(self, h5File: str) -> None:
