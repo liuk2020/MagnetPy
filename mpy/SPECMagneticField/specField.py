@@ -17,7 +17,7 @@ class SPECField:
     Magnetic field in SPEC coordinates! 
     """
 
-    def __init__(self, specData: SPECOut, lvol: int,
+    def __init__(self, specData: SPECOut, lvol: int=0,
     sResolution: int=2, thetaResolution: int=2, zetaResolution: int=2) -> None:
         """
         Args:
