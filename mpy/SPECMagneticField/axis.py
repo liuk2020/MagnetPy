@@ -28,7 +28,7 @@ def findAxis(
     """
 
     if jacobianData is None:
-        base_Jacobian = bField.getB()
+        base_Jacobian = bField.getJacobian()
         base_sArr = bField.sArr
         base_thetaArr = bField.thetaArr
         base_zetaArr = bField.zetaArr
