@@ -2,7 +2,7 @@ import setuptools
 from numpy.distutils.core import setup
 
 
-__version__ = "0.0.0"
+__version__ = "0.1.0"
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -12,7 +12,7 @@ REQUIREMENTS = [i.strip() for i in open("requirements.txt").readlines()]
 setup(
     name="mpy",
     version=__version__,
-    description="Data processing tools for plasma and magnetic field",
+    description="A personal Python package for processing plasma and magnetic field data",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
