@@ -6,10 +6,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from .line import Line
-from typing import List
+from typing import List, Tuple
 
 
-def plotPoincare(lines: List[Line], toroidalIdx: int=0, ax=None, **kwargs):
+def plotPoincare(lines: List[Line], toroidalIdx: int=0, ax=None, **kwargs) -> Tuple[np.ndarray]:
+    """
+    Returns:
+        rArr, zArr
+    """
     
     if ax is None:
         fig, ax = plt.subplots()
@@ -17,7 +21,7 @@ def plotPoincare(lines: List[Line], toroidalIdx: int=0, ax=None, **kwargs):
     if kwargs.get("marker") == None:
         kwargs.update({"marker": "."})
     if kwargs.get("s") == None:
-        kwargs.update({"s": 1.4})
+        kwargs.update({"s": 2.0})
 
     if isinstance(lines, Line):
         lines = [lines]
@@ -32,7 +36,7 @@ def plotPoincare(lines: List[Line], toroidalIdx: int=0, ax=None, **kwargs):
         dots = ax.scatter(rArr, zArr, **kwargs)
     plt.axis("equal")
 
-    return
+    return 
 
 
 if __name__ == "__main__":

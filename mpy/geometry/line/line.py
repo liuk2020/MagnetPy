@@ -10,8 +10,8 @@ class BaseLine:
 
     def __init__(self, rArr: np.ndarray, zArr: np.ndarray, phiArr: np.ndarray) -> None:
         assert rArr.shape == zArr.shape == phiArr.shape
-        self.rArr = rArr,
-        self.zArr = zArr,
+        self.rArr = rArr
+        self.zArr = zArr
         self.phiArr = phiArr
 
 
@@ -19,8 +19,8 @@ class Line(BaseLine):
 
     def __init__(self, rArr: np.ndarray, zArr: np.ndarray, phiNums: int) -> None:
         assert rArr.shape == zArr.shape 
-        self.rArr = rArr,
-        self.zArr = zArr,
+        self.rArr = rArr
+        self.zArr = zArr
         self.phiNums = phiNums
 
     @property
