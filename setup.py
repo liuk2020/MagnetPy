@@ -1,5 +1,4 @@
 import setuptools
-from numpy.distutils.core import setup
 
 
 __version__ = "0.1.0"
@@ -9,7 +8,7 @@ with open("README.md", "r") as fh:
 
 REQUIREMENTS = [i.strip() for i in open("requirements.txt").readlines()]
 
-setup(
+setuptools.setup(
     name="mpy",
     version=__version__,
     description="A personal Python package for processing plasma and magnetic field data",
